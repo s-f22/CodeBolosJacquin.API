@@ -1,6 +1,15 @@
+using CodeBolosJacquin.API.Context;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Pegando a connectionString
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Registrando o DbContext
+builder.Services.AddDbContext<BolosJacquinContext>(options => 
+    options.UseSqlServer(connectionString));
 
 // Add services to the container.
 
