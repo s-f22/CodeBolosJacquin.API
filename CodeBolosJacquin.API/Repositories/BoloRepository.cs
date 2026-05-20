@@ -26,9 +26,14 @@ namespace CodeBolosJacquin.API.Repositories
 
 
 
-        public Task<BoloResponseViewModel?> BuscarPorIdAsync(int id)
+        public async Task<BoloResponseViewModel?> BuscarPorIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var bolo = await _context.Bolos
+                .Include(b => b.Categoria)
+                .Include(b => b.BoloImagens)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            return bolo == null ? null : MapToResponse(bolo);
         }
 
 

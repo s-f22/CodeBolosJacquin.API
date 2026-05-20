@@ -32,6 +32,30 @@ namespace CodeBolosJacquin.API.Controllers
         }
 
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                var bolo = await _boloRepository.BuscarPorIdAsync(id);
+
+                if (
+                    
+                    bolo == null)
+                    return NotFound(new { mensagem = "Bolo não encontrado" });
+
+                return Ok(bolo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao obter o bolo", erro = ex.Message });
+            }
+        }
+
+
+
+
+
 
     }
 }
