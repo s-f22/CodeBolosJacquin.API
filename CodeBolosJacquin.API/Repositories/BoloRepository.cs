@@ -1,6 +1,8 @@
 ﻿using CodeBolosJacquin.API.Context;
+using CodeBolosJacquin.API.Domains;
 using CodeBolosJacquin.API.Interfaces;
 using CodeBolosJacquin.API.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodeBolosJacquin.API.Repositories
 {
@@ -38,9 +40,14 @@ namespace CodeBolosJacquin.API.Repositories
 
 
 
-        public Task<IEnumerable<BoloResponseViewModel>> ListarTodosAsync()
+        public async Task<IEnumerable<BoloResponseViewModel>> ListarTodosAsync()
         {
-            throw new NotImplementedException();
+            var bolos = await _context.Bolos
+                .Include(b => b.Categoria)
+                .Include(b => b.BoloImagens)
+                .ToListAsync();
+
+            return bolos.Select(MapToResponse);
         }
 
 
@@ -48,6 +55,22 @@ namespace CodeBolosJacquin.API.Repositories
         public Task<bool> RemoverAsync(int id)
         {
             throw new NotImplementedException();
+        }
+
+
+
+        private static BoloResponseViewModel MapToResponse(Bolo bolo)
+        {
+            return new BoloResponseViewModel 
+            { 
+                Id = bolo.Id,
+                Nome = bolo.Nome,
+                Descricao = bolo.Descricao,
+                Preco = bolo.Preco,
+                Peso = bolo.Peso,
+                Categorias = bolo.Categoria.Select(c => c.Nome).ToList(),
+                Imagens = bolo.BoloImagens.Select(i => i.CaminhoImagem).ToList(),
+            };
         }
 
 
