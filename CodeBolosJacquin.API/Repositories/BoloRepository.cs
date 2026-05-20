@@ -19,9 +19,51 @@ namespace CodeBolosJacquin.API.Repositories
 
 
 
-        public Task<bool> AtualizarAsync(int id, BoloRequestViewModel bolo)
+        public async Task<bool> AtualizarAsync(int id, BoloRequestViewModel boloAtualizado)
         {
-            throw new NotImplementedException();
+            var bolo = await _context.Bolos
+                .Include(b => b.Categoria)
+                .Include(b => b.BoloImagens)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (bolo == null)
+                throw new KeyNotFoundException("Bolo não encontrado");
+
+            bolo.Nome = boloAtualizado.Nome ?? bolo.Nome;
+            bolo.Descricao = boloAtualizado.Descricao;
+            bolo.Preco = boloAtualizado.Preco;
+            bolo.Peso = boloAtualizado.Peso;
+
+            bolo.Categoria.Clear();
+
+            var categorias = await ObterCategoriasAsync(boloAtualizado.Categorias);
+
+            foreach (var categoria in categorias)
+            {
+                bolo.Categoria.Add(categoria);
+            }
+
+            if (bolo.BoloImagens.Any())
+            {
+                _context.BoloImagens.RemoveRange(bolo.BoloImagens);
+                bolo.BoloImagens.Clear();
+            }
+
+            if (boloAtualizado.Imagens != null)
+            {
+                foreach (var imagem in boloAtualizado.Imagens)
+                {
+                    bolo.BoloImagens.Add(new BoloImagen
+                    {
+                        CaminhoImagem = imagem,
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return true;
+
         }
 
 
@@ -77,6 +119,40 @@ namespace CodeBolosJacquin.API.Repositories
                 Imagens = bolo.BoloImagens.Select(i => i.CaminhoImagem).ToList(),
             };
         }
+
+
+        private async Task<List<Categoria>> ObterCategoriasAsync(IEnumerable<string>? categorias)
+        {
+            var lista = new List<Categoria>();
+
+            if (categorias == null)
+                return lista;
+
+            foreach (var nome in categorias
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Select(n => n.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+            )
+            {
+                var categoria = await _context.Categorias
+                    .FirstOrDefaultAsync(c => c.Nome == nome);
+
+                if (categoria == null)
+                {
+                    categoria = new Categoria
+                    {
+                        Nome = nome,
+                    };
+                    _context.Categorias.Add(categoria);
+                }
+
+                lista.Add(categoria);
+            }
+
+            return lista;
+
+        }
+
 
 
     }

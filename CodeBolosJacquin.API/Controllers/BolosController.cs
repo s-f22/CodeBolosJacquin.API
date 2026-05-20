@@ -1,4 +1,5 @@
 ﻿using CodeBolosJacquin.API.Interfaces;
+using CodeBolosJacquin.API.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,9 +40,7 @@ namespace CodeBolosJacquin.API.Controllers
             {
                 var bolo = await _boloRepository.BuscarPorIdAsync(id);
 
-                if (
-                    
-                    bolo == null)
+                if (bolo == null)
                     return NotFound(new { mensagem = "Bolo não encontrado" });
 
                 return Ok(bolo);
@@ -53,7 +52,31 @@ namespace CodeBolosJacquin.API.Controllers
         }
 
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, BoloRequestViewModel request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            try
+            {
+                var resultado = await _boloRepository.AtualizarAsync(id, request);
+
+                if (!resultado)
+                    return NotFound(new { mensagem = "Bolo não encontrado" });
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new {mensagem = ex.Message});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new {mensagem = "Erro ao atualizar o bolo", erro = ex.Message});
+            }
+
+        }
 
 
 
