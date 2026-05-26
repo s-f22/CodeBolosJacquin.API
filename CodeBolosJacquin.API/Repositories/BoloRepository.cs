@@ -80,9 +80,26 @@ namespace CodeBolosJacquin.API.Repositories
 
 
 
-        public Task<BoloResponseViewModel> CadastrarAsync(BoloRequestViewModel bolo)
+        public async Task<BoloResponseViewModel> CadastrarAsync(BoloRequestViewModel bolo)
         {
-            throw new NotImplementedException();
+            var novoBolo = new Bolo
+            {
+                Nome = bolo.Nome,
+                Descricao = bolo.Descricao,
+                Preco = bolo.Preco,
+                Peso = bolo.Peso
+            };
+
+            novoBolo.Categoria = await ObterCategoriasAsync(bolo.Categorias);
+            novoBolo.BoloImagens = bolo.Imagens?
+                .Select(img => new BoloImagen { CaminhoImagem = img})
+                .ToList() ?? new List<BoloImagen>();
+
+            _context.Bolos.Add(novoBolo);
+            await _context.SaveChangesAsync();
+
+            return MapToResponse(novoBolo);
+
         }
 
 
@@ -99,9 +116,26 @@ namespace CodeBolosJacquin.API.Repositories
 
 
 
-        public Task<bool> RemoverAsync(int id)
+        public async Task<bool> RemoverAsync(int id)
         {
-            throw new NotImplementedException();
+            var bolo = await _context.Bolos
+                .Include(b => b.Categoria)
+                .Include(b => b.BoloImagens)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (bolo == null)
+                throw new KeyNotFoundException("Bolo não encontrado");
+
+            if (bolo.BoloImagens.Any())
+                _context.BoloImagens.RemoveRange(bolo.BoloImagens);
+
+            if (bolo.Categoria.Any())
+                bolo.Categoria.Clear();
+
+            _context.Bolos.Remove(bolo);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
 
