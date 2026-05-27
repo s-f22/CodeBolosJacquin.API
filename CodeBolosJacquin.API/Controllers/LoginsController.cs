@@ -11,6 +11,7 @@ namespace CodeBolosJacquin.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class LoginsController : ControllerBase
     {
         private readonly IUsuarioRepository _usuarioRepository;

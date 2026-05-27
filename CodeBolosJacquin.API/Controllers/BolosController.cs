@@ -1,5 +1,6 @@
 ﻿using CodeBolosJacquin.API.Interfaces;
 using CodeBolosJacquin.API.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
