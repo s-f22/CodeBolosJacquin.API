@@ -21,6 +21,18 @@ builder.Services.AddDbContext<BolosJacquinContext>(options =>
 builder.Services.AddScoped<IBoloRepository, BoloRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
+// Configurar a política de CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact", policy =>
+    {
+        // policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
+});
+
 
 // Add Serialização para evitar erros de ciclo
 builder.Services.AddControllers()
@@ -100,6 +112,9 @@ app.UseStaticFiles(new StaticFileOptions
     // http://localhost:nroDaPorta/Uploads/nomeDoArquivo.png
     RequestPath = "/Uploads"
 });
+
+// Aplicar a politica de CORS
+app.UseCors("AllowReact");
 
 app.UseHttpsRedirection();
 
